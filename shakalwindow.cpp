@@ -28,6 +28,7 @@ ShakalWindow::ShakalWindow(QWidget *parent)
     ui->horizontalSlider->setValue(currentShakalDepth);
     ui->horizontalSlider_2->setRange(1, 20);
     ui->horizontalSlider_2->setValue(currentShakalShakalDepth);
+    std::filesystem::create_directory("../tests/");
 }
 
 void ShakalWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -48,7 +49,6 @@ void ShakalWindow::applyShakal(size_t depth, const std::filesystem::path &source
     tmp.ShakalImage(depth);
 
     std::filesystem::path newFilePath = "../tests/";
-    std::filesystem::create_directory(newFilePath);
     newFilePath /= "shakal.png";
     tmp.SaveImage(newFilePath.string());
 
@@ -101,3 +101,4 @@ ShakalWindow::~ShakalWindow()
 {
     delete ui;
 }
+
