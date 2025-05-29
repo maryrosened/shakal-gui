@@ -36,6 +36,7 @@ CMakeLists.txt.user
 
 build-lin
 build-win
+tests
 .cache
 .vscode
 .token

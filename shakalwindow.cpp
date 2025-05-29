@@ -7,8 +7,6 @@
 #include <QDebug>
 #include "ImageDecoder.hpp"
 
-std::filesystem::path inputImageForTest = "../tests/input.png";
-
 ShakalWindow::ShakalWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::ShakalWindow)
@@ -19,15 +17,17 @@ ShakalWindow::ShakalWindow(QWidget *parent)
 
     ui->label->setText("Перетащите изображение сюда");
     ui->label->setMinimumSize(400, 300);
-    // ui->label->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     ui->label->setScaledContents(true);
 
     // Где-то в конструкторе:
     connect(ui->horizontalSlider, &QSlider::valueChanged, this, &ShakalWindow::onSliderValueChanged);
+    connect(ui->horizontalSlider_2, &QSlider::valueChanged, this, &ShakalWindow::onSecondSliderValueChanged);
 
     // Установим начальное значение (например, от 1 до 10)
-    ui->horizontalSlider->setRange(1, 10);
+    ui->horizontalSlider->setRange(1, 20);
     ui->horizontalSlider->setValue(currentShakalDepth);
+    ui->horizontalSlider_2->setRange(1, 20);
+    ui->horizontalSlider_2->setValue(currentShakalShakalDepth);
 }
 
 void ShakalWindow::dragEnterEvent(QDragEnterEvent *event)
@@ -37,10 +37,34 @@ void ShakalWindow::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void ShakalWindow::onSliderValueChanged(int value) {
-    currentShakalDepth = static_cast<size_t>(value);
-    qDebug() << "Текущая глубина шакализации:" << currentShakalDepth;
+void ShakalWindow::applyShakal(size_t depth, const std::filesystem::path &sourcePath, std::filesystem::path &targetPath)
+{
+    if (!std::filesystem::exists(sourcePath)) {
+        qDebug() << "Файл не найден:" << QString::fromStdString(sourcePath.string());
+        return;
+    }
+
+    converter::ImageConverter tmp(sourcePath);
+    tmp.ShakalImage(depth);
+
+    std::filesystem::path newFilePath = "../tests/shakal.png";
+    tmp.SaveImage(newFilePath.string());
+
+    targetPath = newFilePath;
+
     updateShakalImage();
+}
+
+void ShakalWindow::onSliderValueChanged(int value)
+{
+    currentShakalDepth = static_cast<size_t>(value);
+    applyShakal(currentShakalDepth, m_currentImagePath, m_processedImagePath);
+}
+
+void ShakalWindow::onSecondSliderValueChanged(int value)
+{
+    currentShakalShakalDepth = static_cast<size_t>(value);
+    applyShakal(currentShakalShakalDepth, m_processedImagePath, m_processedImagePath);
 }
 
 void ShakalWindow::dropEvent(QDropEvent *event)
@@ -53,25 +77,15 @@ void ShakalWindow::dropEvent(QDropEvent *event)
 
     // Сохраняем путь, чтобы можно было обновлять шакализацию
     m_currentImagePath = filePath.toStdString();
-
+    m_processedImagePath = m_currentImagePath;
     // Обновляем изображение с текущей глубиной
     updateShakalImage();
 
 }
 
-void ShakalWindow::updateShakalImage() {
-    if (m_currentImagePath.empty()) {
-        qDebug() << "Нет загруженного изображения для шакализации";
-        return;
-    }
-
-    converter::ImageConverter tmp(m_currentImagePath);
-    tmp.ShakalImage(currentShakalDepth);
-
-    std::filesystem::path outputPath = "../shakal.png";
-    tmp.SaveImage(outputPath.string());
-
-    QImage resultImage(QString::fromStdString(outputPath.string()));
+void ShakalWindow::updateShakalImage()
+{
+    QImage resultImage(QString::fromStdString(m_processedImagePath.string()));
     if (resultImage.isNull()) {
         ui->label->setText("Ошибка: не удалось загрузить обработанное изображение");
         return;
