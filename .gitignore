@@ -34,8 +34,8 @@ CMakeLists.txt.user
 *.out
 *.app
 
-build-lin
-build-win
+build
+build
 tests
 .cache
 .vscode
