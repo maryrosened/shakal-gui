@@ -47,7 +47,9 @@ void ShakalWindow::applyShakal(size_t depth, const std::filesystem::path &source
     converter::ImageConverter tmp(sourcePath);
     tmp.ShakalImage(depth);
 
-    std::filesystem::path newFilePath = "../tests/shakal.png";
+    std::filesystem::path newFilePath = "../tests/";
+    std::filesystem::create_directory(newFilePath);
+    newFilePath /= "shakal.png";
     tmp.SaveImage(newFilePath.string());
 
     targetPath = newFilePath;
