@@ -1,0 +1,3 @@
+[submodule "third-party/shakal-converter"]
+	path = third-party/shakal-converter
+	url = https://github.com/2thespace/shakal-converter.git
