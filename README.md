@@ -1,4 +1,4 @@
-# update submodules
+### Установи зависимости 
 ```
 git submodule update --init --recursive
 ```
